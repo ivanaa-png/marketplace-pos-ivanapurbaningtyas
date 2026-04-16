@@ -3,24 +3,33 @@ import { useCart } from '../../context/CartContext';
 import { X, ShoppingBag, Trash2, Minus, Plus, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatRupiah } from '../../lib/utils';
-import { transactionsDB, productsDB } from '../../services/db';
-import { Transaction } from '../../types';
+import { transactionsDB, productsDB, configDB } from '../../services/db';
+import { Transaction, StoreConfig } from '../../types';
 
 export default function CartDrawer() {
   const { state, dispatch } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'payment' | 'success'>('cart');
+  const [storeConfig, setStoreConfig] = useState<StoreConfig | null>(null);
   
   const subtotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
+
+  React.useEffect(() => {
+    const loadConfig = async () => {
+      const config = await configDB.get('store_config');
+      if (config) setStoreConfig(config);
+    };
+    loadConfig();
+  }, []);
 
   const handleProceedToPayment = () => {
     if (state.items.length === 0) return;
     setCheckoutStep('payment');
   };
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = async (sendToWhatsApp: boolean) => {
     setIsCheckingOut(true);
     try {
       const newTransaction: Transaction = {
@@ -49,6 +58,35 @@ export default function CartDrawer() {
             stock: Math.max(0, product.stock - item.quantity)
           });
         }
+      }
+
+      if (sendToWhatsApp) {
+        // Generate WhatsApp Message
+        const phoneNumber = storeConfig?.phone || '+62 858-7826-3582';
+        const cleanPhone = phoneNumber.replace(/\D/g, '');
+        
+        let message = `*NEW ORDER - ${newTransaction.id}*\n`;
+        message += `--------------------------\n`;
+        message += `*Customer:* ${newTransaction.customer}\n`;
+        message += `*Date:* ${newTransaction.date}\n\n`;
+        message += `*Items:*\n`;
+        
+        newTransaction.items.forEach(item => {
+          message += `- ${item.name} (${item.quantity}x) - ${formatRupiah(item.price * item.quantity)}\n`;
+        });
+        
+        message += `\n*Subtotal:* ${formatRupiah(newTransaction.subtotal)}\n`;
+        message += `*Tax (10%):* ${formatRupiah(newTransaction.tax)}\n`;
+        message += `*TOTAL:* ${formatRupiah(newTransaction.totalAmount)}\n`;
+        message += `--------------------------\n`;
+        message += `*Payment Method:* ${newTransaction.paymentMethod.toUpperCase()}\n`;
+        message += `*Status:* PAID\n\n`;
+        message += `Please process my order. Thank you!`;
+
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+        
+        window.open(whatsappUrl, '_blank');
       }
 
       setCheckoutStep('success');
@@ -243,14 +281,35 @@ export default function CartDrawer() {
                   <span>Payment Method</span>
                   <span className="font-bold text-luxury-gold">QRIS / Digital Payment</span>
                 </div>
-                <button 
-                  onClick={checkoutStep === 'payment' ? handleConfirmPayment : handleProceedToPayment}
-                  disabled={isCheckingOut}
-                  className="w-full bg-luxury-charcoal text-white py-4 font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 hover:bg-luxury-gold transition-all group disabled:opacity-50"
-                >
-                  {isCheckingOut ? 'Processing...' : checkoutStep === 'payment' ? 'I Have Paid' : 'Proceed to Payment'}
-                  {!isCheckingOut && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
-                </button>
+                
+                {checkoutStep === 'payment' ? (
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => handleConfirmPayment(true)}
+                      disabled={isCheckingOut}
+                      className="w-full bg-luxury-charcoal text-white py-4 font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 hover:bg-luxury-gold transition-all group disabled:opacity-50"
+                    >
+                      {isCheckingOut ? 'Processing...' : 'Confirm & Send to WhatsApp'}
+                      {!isCheckingOut && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
+                    </button>
+                    <button 
+                      onClick={() => handleConfirmPayment(false)}
+                      disabled={isCheckingOut}
+                      className="w-full bg-white border border-slate-200 text-luxury-charcoal py-4 font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 hover:bg-slate-50 transition-all disabled:opacity-50"
+                    >
+                      {isCheckingOut ? 'Processing...' : 'Confirm (Web Only)'}
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleProceedToPayment}
+                    disabled={isCheckingOut}
+                    className="w-full bg-luxury-charcoal text-white py-4 font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 hover:bg-luxury-gold transition-all group disabled:opacity-50"
+                  >
+                    Proceed to Payment
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                )}
               </div>
             )}
           </motion.div>

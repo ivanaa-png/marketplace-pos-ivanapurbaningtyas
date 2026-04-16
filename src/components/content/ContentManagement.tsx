@@ -24,7 +24,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
 const DEFAULT_STORE: StoreConfig = {
   name: 'LUMEN & ARCE',
   address: 'Jl. Premium Luxury No. 88, Jakarta, Indonesia',
-  phone: '(021) 1234-5678',
+  phone: '+62 858-7826-3582',
   email: 'concierge@lumenarce.com',
   newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.'
 };

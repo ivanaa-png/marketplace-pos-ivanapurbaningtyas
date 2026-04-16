@@ -38,12 +38,24 @@ export default function App() {
     const initApp = async () => {
       try {
         // Ensure DB is initialized and upgraded
-        const { getDB } = await import('./services/db');
+        const { getDB, productsDB, configDB } = await import('./services/db');
         await getDB();
         
         const existing = await productsDB.getAll();
         if (existing.length === 0) {
           await productsDB.bulkAdd(PRODUCTS);
+        }
+
+        // Seed default store config if not exists
+        const existingConfig = await configDB.get('store_config');
+        if (!existingConfig) {
+          await configDB.set('store_config', {
+            name: 'LUMEN & ARCE',
+            address: 'Jl. Premium Luxury No. 88, Jakarta, Indonesia',
+            phone: '+62 858-7826-3582',
+            email: 'concierge@lumenarce.com',
+            newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.'
+          });
         }
       } catch (error) {
         console.error('Initialization failed:', error);
