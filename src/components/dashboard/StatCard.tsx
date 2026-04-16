@@ -1,12 +1,11 @@
 import React from 'react';
-import { DollarSign, ShoppingCart, Users, Package, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from 'lucide-react';
 import { Stat } from '../../types';
 import { motion } from 'motion/react';
 
 const iconMap: Record<string, any> = {
   DollarSign,
   ShoppingCart,
-  Users,
   Package
 };
 

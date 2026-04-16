@@ -12,6 +12,7 @@ import ProductManagement from './components/products/ProductManagement';
 import HistoryView from './components/history/HistoryView';
 import SettingsView from './components/settings/SettingsView';
 import ContentManagement from './components/content/ContentManagement';
+import ReportsView from './components/reports/ReportsView';
 import LandingPage from './components/ecommerce/LandingPage';
 import LoginView from './components/auth/LoginView';
 import { AnimatePresence, motion } from 'motion/react';
@@ -52,9 +53,19 @@ export default function App() {
           await configDB.set('store_config', {
             name: 'LUMEN & ARCE',
             address: 'Jl. Premium Luxury No. 88, Jakarta, Indonesia',
-            phone: '+62 858-7826-3582',
+            phone: '+62 812-5511-1347',
             email: 'concierge@lumenarce.com',
             newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.'
+          });
+        } else if (
+          existingConfig.phone === '+62 858-7826-3582' || 
+          existingConfig.phone === '(021) 1234-5678' || 
+          !existingConfig.phone
+        ) {
+          // Force update if it's still using any of the old development numbers
+          await configDB.set('store_config', {
+            ...existingConfig,
+            phone: '+62 812-5511-1347'
           });
         }
       } catch (error) {
@@ -96,6 +107,8 @@ export default function App() {
         return <ContentManagement />;
       case 'history':
         return <HistoryView />;
+      case 'reports':
+        return <ReportsView />;
       case 'settings':
         return (
           <SettingsView 

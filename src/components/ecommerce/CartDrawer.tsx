@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { X, ShoppingBag, Trash2, Minus, Plus, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { formatRupiah } from '../../lib/utils';
+import { formatRupiah, formatDate } from '../../lib/utils';
 import { transactionsDB, productsDB, configDB } from '../../services/db';
 import { Transaction, StoreConfig } from '../../types';
 
@@ -34,7 +34,7 @@ export default function CartDrawer() {
     try {
       const newTransaction: Transaction = {
         id: `WEB-${Date.now()}`,
-        date: new Date().toLocaleString('id-ID'),
+        date: new Date().toISOString(),
         customer: 'Online Customer',
         items: [...state.items],
         subtotal,
@@ -62,13 +62,13 @@ export default function CartDrawer() {
 
       if (sendToWhatsApp) {
         // Generate WhatsApp Message
-        const phoneNumber = storeConfig?.phone || '+62 858-7826-3582';
+        const phoneNumber = storeConfig?.phone || '+62 812-5511-1347';
         const cleanPhone = phoneNumber.replace(/\D/g, '');
         
         let message = `*NEW ORDER - ${newTransaction.id}*\n`;
         message += `--------------------------\n`;
         message += `*Customer:* ${newTransaction.customer}\n`;
-        message += `*Date:* ${newTransaction.date}\n\n`;
+        message += `*Date:* ${formatDate(newTransaction.date)}\n\n`;
         message += `*Items:*\n`;
         
         newTransaction.items.forEach(item => {

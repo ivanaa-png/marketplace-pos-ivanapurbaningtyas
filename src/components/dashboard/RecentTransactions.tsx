@@ -1,7 +1,7 @@
 import React from 'react';
 import { Transaction } from '../../types';
 import { MoreHorizontal } from 'lucide-react';
-import { formatRupiah } from '../../lib/utils';
+import { formatRupiah, formatDate } from '../../lib/utils';
 
 export default function RecentTransactions({ transactions }: { transactions: Transaction[] }) {
   return (
@@ -29,7 +29,7 @@ export default function RecentTransactions({ transactions }: { transactions: Tra
               <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
                 <td className="px-6 py-4 text-sm font-medium text-slate-900">{tx.id}</td>
                 <td className="px-6 py-4 text-sm text-slate-600">{tx.customer}</td>
-                <td className="px-6 py-4 text-sm text-slate-500">{tx.date}</td>
+                <td className="px-6 py-4 text-sm text-slate-500">{formatDate(tx.date)}</td>
                 <td className="px-6 py-4 text-sm font-bold text-slate-900">{formatRupiah(tx.totalAmount)}</td>
                 <td className="px-6 py-4 text-right">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

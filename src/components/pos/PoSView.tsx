@@ -6,7 +6,7 @@ import CartSidebar from './CartSidebar';
 import { Search, Filter, CheckCircle2, Printer, X, Download, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { productsDB, transactionsDB } from '../../services/db';
-import { formatRupiah } from '../../lib/utils';
+import { formatRupiah, formatDate } from '../../lib/utils';
 import { toPng } from 'html-to-image';
 
 export default function PoSView() {
@@ -98,7 +98,7 @@ export default function PoSView() {
 
     const newTransaction: Transaction = {
       id: `TX-${Date.now()}`,
-      date: new Date().toLocaleString('id-ID'),
+      date: new Date().toISOString(),
       customer: 'Walk-in Customer',
       items: [...cart],
       subtotal,
@@ -244,7 +244,7 @@ export default function PoSView() {
                   <h2 className="text-lg font-bold uppercase tracking-widest">LUMEN & ARCE</h2>
                   <p>Jl. Premium Luxury No. 88</p>
                   <p>Jakarta, Indonesia</p>
-                  <p>Telp: (021) 1234-5678</p>
+                  <p>Telp: +62 812-5511-1347</p>
                 </div>
 
                 <div className="border-t border-dashed border-slate-300 pt-4 space-y-1">
@@ -254,7 +254,7 @@ export default function PoSView() {
                   </div>
                   <div className="flex justify-between">
                     <span>Tanggal:</span>
-                    <span>{lastTransaction.date}</span>
+                    <span>{lastTransaction.date ? formatDate(lastTransaction.date) : '-'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Kasir:</span>

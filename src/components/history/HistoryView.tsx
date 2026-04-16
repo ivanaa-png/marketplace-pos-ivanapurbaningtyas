@@ -3,7 +3,7 @@ import { Transaction } from '../../types';
 import { transactionsDB } from '../../services/db';
 import { Search, Calendar, Filter, Printer, Eye, X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { formatRupiah } from '../../lib/utils';
+import { formatRupiah, formatDate } from '../../lib/utils';
 import { toPng } from 'html-to-image';
 
 export default function HistoryView() {
@@ -115,7 +115,7 @@ export default function HistoryView() {
                 filteredTransactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4 text-sm font-bold text-slate-900">{tx.id}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{tx.date}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500">{formatDate(tx.date)}</td>
                     <td className="px-6 py-4 text-sm text-slate-600 font-medium">{tx.customer}</td>
                     <td className="px-6 py-4 text-sm font-bold text-slate-900">{formatRupiah(tx.totalAmount)}</td>
                     <td className="px-6 py-4">
@@ -172,7 +172,7 @@ export default function HistoryView() {
                   </div>
                   <div className="flex justify-between">
                     <span>Tanggal:</span>
-                    <span>{selectedTransaction.date}</span>
+                    <span>{formatDate(selectedTransaction.date)}</span>
                   </div>
                 </div>
 

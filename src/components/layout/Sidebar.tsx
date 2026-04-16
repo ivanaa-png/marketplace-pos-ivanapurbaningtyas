@@ -8,7 +8,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   LogOut,
-  Layout
+  Layout,
+  FileText
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -25,6 +26,7 @@ const menuItems = [
   { id: 'products', label: 'Products', icon: Package },
   { id: 'content', label: 'Content', icon: Layout },
   { id: 'history', label: 'History', icon: History },
+  { id: 'reports', label: 'Reports', icon: FileText },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

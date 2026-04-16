@@ -62,6 +62,5 @@ export const CATEGORIES = ['All', 'Men', 'Women', 'Couple', 'Accessories'];
 export const DASHBOARD_STATS: Stat[] = [
   { label: 'Total Revenue', value: 'Rp 428.430.000', change: 15.2, trend: 'up', icon: 'DollarSign' },
   { label: 'Total Sales', value: '840', change: 5.2, trend: 'up', icon: 'ShoppingCart' },
-  { label: 'New Customers', value: '120', change: -1.4, trend: 'down', icon: 'Users' },
   { label: 'Active Products', value: '42', change: 2.1, trend: 'up', icon: 'Package' },
 ];

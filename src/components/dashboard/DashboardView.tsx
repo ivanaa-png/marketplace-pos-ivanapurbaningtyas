@@ -2,33 +2,70 @@ import React, { useState, useEffect } from 'react';
 import { DASHBOARD_STATS } from '../../constants';
 import StatCard from './StatCard';
 import RecentTransactions from './RecentTransactions';
+import RevenueChart from './RevenueChart';
 import { motion } from 'motion/react';
 import { productsDB, transactionsDB } from '../../services/db';
 import { Transaction, Product } from '../../types';
-import { formatRupiah } from '../../lib/utils';
+import { formatRupiah, safeDate } from '../../lib/utils';
+import { Database, Plus } from 'lucide-react';
 
 export default function DashboardView() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const loadData = async () => {
+    try {
+      const [dbTx, dbProducts] = await Promise.all([
+        transactionsDB.getAll(),
+        productsDB.getAll()
+      ]);
+      setTransactions(dbTx.sort((a, b) => safeDate(b.date).getTime() - safeDate(a.date).getTime()));
+      setProducts(dbProducts);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [dbTx, dbProducts] = await Promise.all([
-          transactionsDB.getAll(),
-          productsDB.getAll()
-        ]);
-        setTransactions(dbTx.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-        setProducts(dbProducts);
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadData();
   }, []);
+
+  const handleGenerateSampleData = async () => {
+    setIsLoading(true);
+    try {
+      const samples: Transaction[] = [];
+      const item = products[0] || { id: 'P-001', name: 'Sample Item', price: 1000000, category: 'Men' };
+      
+      // Generate some random transactions for the last 7 days
+      for (let i = 0; i < 10; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - Math.floor(Math.random() * 7));
+        
+        const tx: Transaction = {
+          id: `SAMPLE-${Date.now()}-${i}`,
+          date: d.toISOString(),
+          customer: `Sample Customer ${i + 1}`,
+          items: [{ ...item, quantity: 1 } as any],
+          subtotal: item.price,
+          tax: item.price * 0.1,
+          totalAmount: item.price * 1.1,
+          amountPaid: item.price * 1.1,
+          change: 0,
+          paymentMethod: 'qris',
+          status: 'completed'
+        };
+        await transactionsDB.add(tx);
+      }
+      await loadData();
+    } catch (error) {
+      console.error('Failed to generate sample data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Calculate dynamic stats based on DB data
   const totalRevenue = transactions.reduce((sum, tx) => sum + tx.totalAmount, 0);
@@ -56,9 +93,34 @@ export default function DashboardView() {
   const dynamicStats = [
     { ...DASHBOARD_STATS[0], value: formatRupiah(totalRevenue) },
     { ...DASHBOARD_STATS[1], value: totalSales.toString() },
-    { ...DASHBOARD_STATS[2] }, // Keep customers as is for now
-    { ...DASHBOARD_STATS[3], value: activeProducts.toString() },
+    { ...DASHBOARD_STATS[2], value: activeProducts.toString() },
   ];
+
+  const handleDownloadReport = () => {
+    const headers = ['Order ID', 'Date', 'Customer', 'Total Amount', 'Payment Method', 'Status'];
+    const rows = transactions.map(tx => [
+      tx.id,
+      tx.date,
+      tx.customer,
+      tx.totalAmount.toString(),
+      tx.paymentMethod,
+      tx.status
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', `Full_Sales_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="h-full overflow-y-auto no-scrollbar">
@@ -69,14 +131,25 @@ export default function DashboardView() {
             <p className="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+            {transactions.length === 0 && (
+              <button 
+                onClick={handleGenerateSampleData}
+                className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 border border-primary/20 rounded-xl text-sm font-semibold text-primary hover:bg-primary hover:text-white transition-all shadow-sm"
+              >
+                <Database size={18} /> Generate Demo Data
+              </button>
+            )}
+            <button 
+              onClick={handleDownloadReport}
+              className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
+            >
               Download Report
             </button>
           </div>
         </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {dynamicStats.map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -88,6 +161,15 @@ export default function DashboardView() {
           </motion.div>
         ))}
       </div>
+
+      {/* Charts Section */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        <RevenueChart transactions={transactions} />
+      </motion.div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
