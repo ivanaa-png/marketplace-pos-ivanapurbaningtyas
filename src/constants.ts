@@ -16,7 +16,7 @@ export const PRODUCTS: Product[] = [
     price: 18500000,
     stock: 8,
     category: 'Men',
-    image: 'https://images.unsplash.com/photo-1594932224010-75f2a77d5250?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800',
     description: 'Italian wool charcoal suit, perfectly tailored for the modern gentleman.',
   },
   {

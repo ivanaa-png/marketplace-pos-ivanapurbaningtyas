@@ -25,6 +25,8 @@ export default function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  const [isDataReady, setIsDataReady] = useState(false);
+  
   // User Profile State
   const [user, setUser] = useState({
     name: 'IVANA',
@@ -34,13 +36,30 @@ export default function App() {
   // Seed data on first load
   useEffect(() => {
     const seed = async () => {
-      const existing = await productsDB.getAll();
-      if (existing.length === 0) {
-        await productsDB.bulkAdd(PRODUCTS);
+      try {
+        const existing = await productsDB.getAll();
+        if (existing.length === 0) {
+          await productsDB.bulkAdd(PRODUCTS);
+        }
+      } catch (error) {
+        console.error('Seeding failed:', error);
+      } finally {
+        setIsDataReady(true);
       }
     };
     seed();
   }, []);
+
+  if (!isDataReady) {
+    return (
+      <div className="min-h-screen bg-luxury-offwhite flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-luxury-gold border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="font-serif italic text-luxury-charcoal">Preparing your boutique...</p>
+        </div>
+      </div>
+    );
+  }
 
   const updateUser = (newName: string) => setUser(prev => ({ ...prev, name: newName }));
 

@@ -38,14 +38,25 @@ export default function LandingPage({ onAdminClick }: { onAdminClick: () => void
   }, []);
 
   const loadData = async () => {
+    setIsLoading(true);
     try {
       const [pData, hData, sData] = await Promise.all([
         productsDB.getAll(),
         configDB.get('hero_slides'),
         configDB.get('store_config')
       ]);
-      setProducts(pData);
-      setFilteredProducts(pData);
+      
+      // If products are still empty (e.g. race condition), wait a bit and retry once
+      if (pData.length === 0) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const retryData = await productsDB.getAll();
+        setProducts(retryData);
+        setFilteredProducts(retryData);
+      } else {
+        setProducts(pData);
+        setFilteredProducts(pData);
+      }
+
       if (hData) setHeroSlides(hData);
       if (sData) setStoreConfig(sData);
     } catch (error) {
@@ -194,14 +205,25 @@ export default function LandingPage({ onAdminClick }: { onAdminClick: () => void
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="py-24 text-center space-y-4">
-              <p className="font-serif italic text-slate-400">No pieces found in this selection.</p>
-              <button 
-                onClick={() => { setActiveCategory('All'); setActiveSize('All'); }}
-                className="text-xs font-bold uppercase tracking-widest text-luxury-gold border-b border-luxury-gold pb-1"
-              >
-                View All Collection
-              </button>
+            <div className="py-24 text-center space-y-6">
+              <div className="space-y-2">
+                <p className="font-serif italic text-slate-400">No pieces found in this selection.</p>
+                <p className="text-[10px] text-slate-300 uppercase tracking-widest">Try adjusting your filters or search query.</p>
+              </div>
+              <div className="flex flex-col items-center gap-4">
+                <button 
+                  onClick={() => { setActiveCategory('All'); setActiveSize('All'); setSearchQuery(''); }}
+                  className="text-xs font-bold uppercase tracking-widest text-luxury-gold border-b border-luxury-gold pb-1"
+                >
+                  Clear All Filters
+                </button>
+                <button 
+                  onClick={loadData}
+                  className="px-6 py-2 bg-luxury-charcoal text-white text-[10px] font-bold uppercase tracking-widest hover:bg-luxury-gold transition-all"
+                >
+                  Refresh Collection
+                </button>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">

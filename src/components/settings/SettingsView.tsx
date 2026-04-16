@@ -92,6 +92,54 @@ export default function SettingsView({ user, onUpdateUser }: SettingsViewProps) 
                 </button>
               </form>
             </section>
+
+            {/* Data Management Section */}
+            <section className="bg-white rounded-3xl p-8 shadow-soft border border-slate-100 space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-slate-900">Data Management</h3>
+                <p className="text-sm text-slate-500">Manage your local boutique data.</p>
+              </div>
+
+              <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 space-y-2">
+                <p className="text-xs text-amber-800 font-bold">Note on Data Persistence:</p>
+                <p className="text-[11px] text-amber-700 leading-relaxed">
+                  Currently, all data (products, transactions, settings) is stored **locally in your browser** using IndexedDB. 
+                  This means data is not shared between different browsers or devices. If you open the "Shared App URL" in a new browser, 
+                  it will start with a fresh set of default products.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <button 
+                  onClick={async () => {
+                    if (window.confirm('This will reset all products to default. Continue?')) {
+                      const { productsDB } = await import('../../services/db');
+                      const { PRODUCTS } = await import('../../constants');
+                      const existing = await productsDB.getAll();
+                      for (const p of existing) {
+                        await productsDB.delete(p.id);
+                      }
+                      await productsDB.bulkAdd(PRODUCTS);
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all"
+                >
+                  Reset Products to Default
+                </button>
+                <button 
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to clear ALL local data? This cannot be undone.')) {
+                      indexedDB.deleteDatabase('lumina_store_db');
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all"
+                >
+                  Clear All Local Storage
+                </button>
+              </div>
+            </section>
           </div>
         </div>
       </div>
