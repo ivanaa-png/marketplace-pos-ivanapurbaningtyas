@@ -35,19 +35,23 @@ export default function App() {
 
   // Seed data on first load
   useEffect(() => {
-    const seed = async () => {
+    const initApp = async () => {
       try {
+        // Ensure DB is initialized and upgraded
+        const { getDB } = await import('./services/db');
+        await getDB();
+        
         const existing = await productsDB.getAll();
         if (existing.length === 0) {
           await productsDB.bulkAdd(PRODUCTS);
         }
       } catch (error) {
-        console.error('Seeding failed:', error);
+        console.error('Initialization failed:', error);
       } finally {
         setIsDataReady(true);
       }
     };
-    seed();
+    initApp();
   }, []);
 
   if (!isDataReady) {
