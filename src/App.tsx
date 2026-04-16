@@ -34,6 +34,11 @@ export default function App() {
     role: 'Administrator'
   });
 
+  // Set Page Title
+  useEffect(() => {
+    document.title = 'LUMEN & ARCE';
+  }, []);
+
   // Seed data on first load
   useEffect(() => {
     const initApp = async () => {
