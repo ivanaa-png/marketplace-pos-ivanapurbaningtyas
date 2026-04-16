@@ -7,7 +7,7 @@ export const PRODUCTS: Product[] = [
     price: 12500000,
     stock: 5,
     category: 'Women',
-    image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&q=80&w=800',
+    image: '/images/gown.jpg',
     description: 'Exquisite midnight blue silk gown with hand-stitched detailing.',
   },
   {
@@ -16,7 +16,7 @@ export const PRODUCTS: Product[] = [
     price: 18500000,
     stock: 8,
     category: 'Men',
-    image: 'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800',
+    image: '/images/suit.jpg',
     description: 'Italian wool charcoal suit, perfectly tailored for the modern gentleman.',
   },
   {
@@ -25,7 +25,7 @@ export const PRODUCTS: Product[] = [
     price: 21000000,
     stock: 12,
     category: 'Couple',
-    image: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&q=80&w=800',
+    image: '/images/lounge.jpg',
     description: 'Ultra-soft cashmere sets designed for elegant coordination.',
   },
   {
@@ -34,7 +34,7 @@ export const PRODUCTS: Product[] = [
     price: 154000000,
     stock: 2,
     category: 'Accessories',
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
+    image: '/images/watch.jpg',
     description: 'Luxury timepiece featuring VVS diamonds and 18k gold.',
   },
   {
@@ -43,7 +43,7 @@ export const PRODUCTS: Product[] = [
     price: 6500000,
     stock: 15,
     category: 'Men',
-    image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&q=80&w=800',
+    image: '/images/shoes.jpg',
     description: 'Full-grain leather oxfords with Goodyear welt construction.',
   },
   {
@@ -52,7 +52,7 @@ export const PRODUCTS: Product[] = [
     price: 4500000,
     stock: 20,
     category: 'Accessories',
-    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=800',
+    image: '/images/clutch.jpg',
     description: 'Deep emerald velvet clutch with a detachable 24k gold plated chain.',
   },
 ];

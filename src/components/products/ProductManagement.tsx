@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { productsDB } from '../../services/db';
 import { Product } from '../../types';
-import { Plus, Search, Edit2, Trash2, X, Upload, Package } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Upload, Package, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CATEGORIES } from '../../constants';
 import { formatRupiah, parseRupiah } from '../../lib/utils';
@@ -137,6 +137,10 @@ export default function ProductManagement() {
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Product Management</h1>
             <p className="text-slate-500 mt-1">Manage your premium inventory and stock levels.</p>
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-100">
+              <Shield size={14} />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Local Storage Only</span>
+            </div>
           </div>
           <button 
             onClick={() => handleOpenModal()}

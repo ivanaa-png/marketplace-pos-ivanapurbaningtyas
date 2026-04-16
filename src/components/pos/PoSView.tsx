@@ -3,7 +3,7 @@ import { CATEGORIES, PRODUCTS } from '../../constants';
 import { Product, CartItem, Transaction } from '../../types';
 import ProductCard from './ProductCard';
 import CartSidebar from './CartSidebar';
-import { Search, Filter, CheckCircle2, Printer, X, Download } from 'lucide-react';
+import { Search, Filter, CheckCircle2, Printer, X, Download, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { productsDB, transactionsDB } from '../../services/db';
 import { formatRupiah } from '../../lib/utils';
@@ -148,6 +148,12 @@ export default function PoSView() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
+            </div>
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl border border-amber-100">
+              <Shield size={16} />
+              <div className="text-[10px] leading-tight font-bold uppercase tracking-wider">
+                Local Mode<br/>Device Only
+              </div>
             </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
               {CATEGORIES.map(cat => (

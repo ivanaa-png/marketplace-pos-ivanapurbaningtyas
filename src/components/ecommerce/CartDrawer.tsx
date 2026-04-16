@@ -120,6 +120,11 @@ export default function CartDrawer() {
                   </div>
                   <h3 className="font-serif text-2xl text-luxury-charcoal">Order Confirmed</h3>
                   <p className="text-slate-500 text-sm italic">Thank you for choosing LUMEN & ARCE. Your timeless pieces are being prepared.</p>
+                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 max-w-[280px]">
+                    <p className="text-[10px] text-amber-700 font-bold uppercase tracking-widest leading-relaxed">
+                      Note: This transaction is stored locally on this device only.
+                    </p>
+                  </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pt-4">Redirecting to boutique...</p>
                 </motion.div>
               ) : checkoutStep === 'payment' ? (
