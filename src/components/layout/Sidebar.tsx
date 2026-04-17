@@ -9,7 +9,9 @@ import {
   ChevronRight,
   LogOut,
   Layout,
-  FileText
+  FileText,
+  Truck,
+  Building2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -24,6 +26,8 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'pos', label: 'Point of Sale', icon: ShoppingCart },
   { id: 'products', label: 'Products', icon: Package },
+  { id: 'suppliers', label: 'Suppliers', icon: Building2 },
+  { id: 'purchases', label: 'Purchases', icon: Truck },
   { id: 'content', label: 'Content', icon: Layout },
   { id: 'history', label: 'History', icon: History },
   { id: 'reports', label: 'Reports', icon: FileText },

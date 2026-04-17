@@ -262,9 +262,9 @@ export default function ProductManagement() {
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative bg-white rounded-3xl shadow-premium max-w-2xl w-full overflow-hidden"
+              className="relative bg-white rounded-3xl shadow-premium max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
                 <h3 className="text-xl font-bold text-slate-900">
                   {editingProduct ? 'Edit Product' : 'Add New Product'}
                 </h3>
@@ -273,7 +273,7 @@ export default function ProductManagement() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+              <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto no-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>

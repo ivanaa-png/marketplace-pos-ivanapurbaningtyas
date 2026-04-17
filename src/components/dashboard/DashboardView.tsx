@@ -7,9 +7,9 @@ import { motion } from 'motion/react';
 import { productsDB, transactionsDB } from '../../services/db';
 import { Transaction, Product } from '../../types';
 import { formatRupiah, safeDate } from '../../lib/utils';
-import { Database, Plus } from 'lucide-react';
+import { Database, Plus, AlertTriangle, ArrowRight } from 'lucide-react';
 
-export default function DashboardView() {
+export default function DashboardView({ onRestock }: { onRestock: () => void }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +148,8 @@ export default function DashboardView() {
           </div>
         </div>
 
+      <LowStockAlert products={products} onRestock={onRestock} />
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {dynamicStats.map((stat, i) => (
@@ -227,4 +229,43 @@ export default function DashboardView() {
       </div>
     </div>
   );
-}
+};
+
+const LowStockAlert = ({ products, onRestock }: { products: Product[], onRestock: () => void }) => {
+  const lowStockProducts = products.filter(p => p.stock < 5);
+  
+  if (lowStockProducts.length === 0) return null;
+
+  return (
+    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-8 shadow-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+          <AlertTriangle size={20} />
+        </div>
+        <div>
+          <h4 className="font-bold text-amber-900">Low Stock Alert</h4>
+          <p className="text-xs text-amber-600">Ada {lowStockProducts.length} produk di bawah batas minimum stok (5 unit).</p>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {lowStockProducts.map(p => (
+          <div key={p.id} className="flex items-center justify-between bg-white/60 p-3 rounded-xl border border-amber-200/50">
+            <div className="flex items-center gap-3">
+              <img src={p.image} className="w-8 h-8 rounded-lg object-cover" />
+              <div>
+                <p className="text-sm font-bold text-slate-900">{p.name}</p>
+                <p className="text-[10px] text-slate-500">Stok saat ini: <span className="text-amber-600 font-bold">{p.stock} unit</span></p>
+              </div>
+            </div>
+            <button 
+              onClick={onRestock}
+              className="px-3 py-1.5 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-amber-200 transition-colors flex items-center gap-1"
+            >
+              Restock <ArrowRight size={10} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

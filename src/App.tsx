@@ -13,6 +13,8 @@ import HistoryView from './components/history/HistoryView';
 import SettingsView from './components/settings/SettingsView';
 import ContentManagement from './components/content/ContentManagement';
 import ReportsView from './components/reports/ReportsView';
+import SupplierPage from './components/suppliers/SupplierPage';
+import PurchaseManager from './components/purchases/PurchaseManager';
 import LandingPage from './components/ecommerce/LandingPage';
 import LoginView from './components/auth/LoginView';
 import { AnimatePresence, motion } from 'motion/react';
@@ -44,8 +46,11 @@ export default function App() {
     const initApp = async () => {
       try {
         // Ensure DB is initialized and upgraded
-        const { getDB, productsDB, configDB } = await import('./services/db');
+        const { getDB, productsDB, configDB, suppliersDB } = await import('./services/db');
         await getDB();
+        
+        // Seed suppliers
+        await suppliersDB.seed();
         
         const existing = await productsDB.getAll();
         if (existing.length === 0) {
@@ -103,11 +108,15 @@ export default function App() {
   const renderAdminView = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView onRestock={() => setActiveTab('purchases')} />;
       case 'pos':
         return <PoSView />;
       case 'products':
         return <ProductManagement />;
+      case 'suppliers':
+        return <SupplierPage />;
+      case 'purchases':
+        return <PurchaseManager />;
       case 'content':
         return <ContentManagement />;
       case 'history':
@@ -201,7 +210,7 @@ export default function App() {
           onLogout={() => setView('ecommerce')}
         />
         
-        <main className="flex-1 pt-20 overflow-hidden">
+        <main className="flex-1 pt-20 overflow-y-auto no-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
