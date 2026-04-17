@@ -5,6 +5,7 @@ import { Plus, Search, Edit2, Trash2, X, Upload, Package, Shield, Calculator, In
 import { motion, AnimatePresence } from 'motion/react';
 import { CATEGORIES } from '../../constants';
 import { formatRupiah } from '../../lib/utils';
+import ConfirmModal from '../ui/ConfirmModal';
 
 export default function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,6 +14,10 @@ export default function ProductManagement() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [storeConfig, setStoreConfig] = useState<StoreConfig | null>(null);
+
+  // Confirm Modal State
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   // Form State
   const [formData, setFormData] = useState<Partial<Product> & { purchasePriceInput: string }>({
@@ -134,10 +139,15 @@ export default function ProductManagement() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+  const handleDelete = (id: string) => {
+    setProductToDelete(id);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (productToDelete) {
       try {
-        await productsDB.delete(id);
+        await productsDB.delete(productToDelete);
         await loadData();
       } catch (error) {
         console.error('Failed to delete product:', error);
@@ -441,6 +451,16 @@ export default function ProductManagement() {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal 
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        title="Hapus Produk?"
+        message="Tindakan ini tidak dapat dibatalkan. Produk akan dihapus secara permanen dari basis data lokal Anda."
+        confirmText="Hapus Permanen"
+        variant="danger"
+      />
     </div>
   </div>
   );

@@ -91,7 +91,7 @@ export default function App() {
           await configDB.set('store_config', {
             name: 'LUMEN & ARCE',
             address: 'Jl. Premium Luxury No. 88, Jakarta, Indonesia',
-            phone: '+62 812-5511-1347',
+            phone: '+62 897-4220-209',
             email: 'concierge@lumenarce.com',
             newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.',
             marginType: 'percentage',
@@ -105,6 +105,7 @@ export default function App() {
             marginValue: 20
           });
         } else if (
+          existingConfig.phone === '+62 812-5511-1347' || 
           existingConfig.phone === '+62 858-7826-3582' || 
           existingConfig.phone === '(021) 1234-5678' || 
           !existingConfig.phone
@@ -112,7 +113,7 @@ export default function App() {
           // Force update if it's still using any of the old development numbers
           await configDB.set('store_config', {
             ...existingConfig,
-            phone: '+62 812-5511-1347'
+            phone: '+62 897-4220-209'
           });
         }
       } catch (error) {

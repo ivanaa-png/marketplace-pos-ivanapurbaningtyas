@@ -3,6 +3,7 @@ import { User, Save, Settings as SettingsIcon, Store, Percent, DollarSign, Datab
 import { motion, AnimatePresence } from 'motion/react';
 import { configDB } from '../../services/db';
 import { StoreConfig } from '../../types';
+import ConfirmModal from '../ui/ConfirmModal';
 
 interface SettingsViewProps {
   user: {
@@ -21,6 +22,10 @@ export default function SettingsView({ user, onUpdateUser }: SettingsViewProps) 
   const [storeConfig, setStoreConfig] = useState<StoreConfig | null>(null);
   const [isStoreSaving, setIsStoreSaving] = useState(false);
 
+  // Confirm Modal State
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
+
   useEffect(() => {
     const loadConfig = async () => {
       const config = await configDB.get('store_config');
@@ -34,6 +39,22 @@ export default function SettingsView({ user, onUpdateUser }: SettingsViewProps) 
     onUpdateUser(name);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
+  };
+
+  const confirmReset = async () => {
+    const { productsDB } = await import('../../services/db');
+    const { PRODUCTS } = await import('../../constants');
+    const existing = await productsDB.getAll();
+    for (const p of existing) {
+      await productsDB.delete(p.id);
+    }
+    await productsDB.bulkAdd(PRODUCTS);
+    window.location.reload();
+  };
+
+  const confirmClear = () => {
+    indexedDB.deleteDatabase('lumina_store_db');
+    window.location.reload();
   };
 
   const handleSaveStoreConfig = async (e: React.FormEvent) => {
@@ -330,29 +351,13 @@ export default function SettingsView({ user, onUpdateUser }: SettingsViewProps) 
 
                   <div className="flex flex-wrap gap-4">
                     <button 
-                      onClick={async () => {
-                        if (window.confirm('This will reset all products to default. Continue?')) {
-                          const { productsDB } = await import('../../services/db');
-                          const { PRODUCTS } = await import('../../constants');
-                          const existing = await productsDB.getAll();
-                          for (const p of existing) {
-                            await productsDB.delete(p.id);
-                          }
-                          await productsDB.bulkAdd(PRODUCTS);
-                          window.location.reload();
-                        }
-                      }}
+                      onClick={() => setIsResetConfirmOpen(true)}
                       className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all"
                     >
                       Reset Products to Default
                     </button>
                     <button 
-                      onClick={() => {
-                        if (window.confirm('Are you sure you want to clear ALL local data? This cannot be undone.')) {
-                          indexedDB.deleteDatabase('lumina_store_db');
-                          window.location.reload();
-                        }
-                      }}
+                      onClick={() => setIsClearConfirmOpen(true)}
                       className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all"
                     >
                       Clear All Local Storage
@@ -364,6 +369,26 @@ export default function SettingsView({ user, onUpdateUser }: SettingsViewProps) 
           </div>
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={isResetConfirmOpen}
+        onClose={() => setIsResetConfirmOpen(false)}
+        onConfirm={confirmReset}
+        title="Reset Data Produk?"
+        message="Ini akan menghapus semua produk buatan Anda dan mengembalikannya ke daftar produk default. Lanjutkan?"
+        confirmText="Reset Sekarang"
+        variant="warning"
+      />
+
+      <ConfirmModal 
+        isOpen={isClearConfirmOpen}
+        onClose={() => setIsClearConfirmOpen(false)}
+        onConfirm={confirmClear}
+        title="Hapus Seluruh Data?"
+        message="Tindakan ini akan menghapus seluruh data termasuk transaksi, produk, dan pengaturan. Aplikasi akan diatur ulang sepenuhnya. Tindakan ini tidak dapat dibatalkan."
+        confirmText="Hapus Segalanya"
+        variant="danger"
+      />
     </div>
   );
 }

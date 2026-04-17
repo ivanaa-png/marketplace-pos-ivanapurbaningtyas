@@ -252,7 +252,7 @@ export default function PoSView() {
                   <h2 className="text-lg font-bold uppercase tracking-widest">{storeConfig?.storeName || 'LUMEN & ARCE'}</h2>
                   <p>{storeConfig?.address || 'Jl. Premium Luxury No. 88'}</p>
                   <p>Jakarta, Indonesia</p>
-                  <p>Telp: {storeConfig?.phone || '+62 812-5511-1347'}</p>
+                  <p>Telp: {storeConfig?.phone || '+62 897-4220-209'}</p>
                   {storeConfig?.email && <p>{storeConfig.email}</p>}
                 </div>
 

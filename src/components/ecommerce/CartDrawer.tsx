@@ -62,7 +62,7 @@ export default function CartDrawer() {
 
       if (sendToWhatsApp) {
         // Generate WhatsApp Message
-        const phoneNumber = storeConfig?.phone || '+62 812-5511-1347';
+        const phoneNumber = storeConfig?.phone || '+62 897-4220-209';
         const cleanPhone = phoneNumber.replace(/\D/g, '');
         
         let message = `*NEW ORDER - ${newTransaction.id}*\n`;
