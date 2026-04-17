@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: '1',
-    image: 'https://images.unsplash.com/photo-1594932224828-b4b057b7d6ee?q=80&w=2000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1558997519-83bc9c02c639?q=80&w=2000&auto=format&fit=crop',
     title: 'Timeless Elegance',
     subtitle: 'For Modern Icons',
     description: 'Discover the art of bespoke tailoring and premium materials crafted for those who define excellence.'
