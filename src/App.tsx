@@ -87,6 +87,11 @@ export default function App() {
 
         // Seed default store config if not exists
         const existingConfig = await configDB.get('store_config');
+        
+        // One-time migration for the new WhatsApp number
+        const WA_MIGRATION_KEY = 'wa_migration_v1';
+        const hasMigratedWA = await configDB.get(WA_MIGRATION_KEY);
+
         if (!existingConfig) {
           await configDB.set('store_config', {
             name: 'LUMEN & ARCE',
@@ -97,24 +102,25 @@ export default function App() {
             marginType: 'percentage',
             marginValue: 20
           });
-        } else if (!existingConfig.marginType) {
-          // Update legacy config to include profit margin settings
-          await configDB.set('store_config', {
-            ...existingConfig,
-            marginType: 'percentage',
-            marginValue: 20
-          });
-        } else if (
-          existingConfig.phone === '+62 812-5511-1347' || 
-          existingConfig.phone === '+62 858-7826-3582' || 
-          existingConfig.phone === '(021) 1234-5678' || 
-          !existingConfig.phone
-        ) {
-          // Force update if it's still using any of the old development numbers
-          await configDB.set('store_config', {
-            ...existingConfig,
-            phone: '+62 897-4220-209'
-          });
+          await configDB.set(WA_MIGRATION_KEY, true);
+        } else {
+          // Update legacy config to include profit margin settings if missing
+          if (!existingConfig.marginType) {
+            await configDB.set('store_config', {
+              ...existingConfig,
+              marginType: 'percentage',
+              marginValue: 20
+            });
+          }
+
+          // Force update to the new number if migration hasn't run yet
+          if (!hasMigratedWA) {
+            await configDB.set('store_config', {
+              ...existingConfig,
+              phone: '+62 897-4220-209'
+            });
+            await configDB.set(WA_MIGRATION_KEY, true);
+          }
         }
       } catch (error) {
         console.error('Initialization failed:', error);
