@@ -3,7 +3,7 @@ import { DASHBOARD_STATS } from '../../constants';
 import StatCard from './StatCard';
 import RecentTransactions from './RecentTransactions';
 import RevenueChart from './RevenueChart';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { productsDB, transactionsDB } from '../../services/db';
 import { Transaction, Product } from '../../types';
 import { formatRupiah, safeDate } from '../../lib/utils';
@@ -125,6 +125,21 @@ export default function DashboardView({ onRestock }: { onRestock: () => void }) 
   return (
     <div className="h-full overflow-y-auto no-scrollbar">
       <div className="p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
+        <AnimatePresence>
+          {products.filter(p => p.stock < 5).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="relative overflow-hidden"
+            >
+              <LowStockAlert products={products} onRestock={onRestock} />
+              {/* Decorative background pulse */}
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl animate-pulse" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
@@ -147,8 +162,6 @@ export default function DashboardView({ onRestock }: { onRestock: () => void }) 
             </button>
           </div>
         </div>
-
-      <LowStockAlert products={products} onRestock={onRestock} />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -237,35 +250,47 @@ const LowStockAlert = ({ products, onRestock }: { products: Product[], onRestock
   if (lowStockProducts.length === 0) return null;
 
   return (
-    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-8 shadow-sm">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
-          <AlertTriangle size={20} />
-        </div>
-        <div>
-          <h4 className="font-bold text-amber-900">Low Stock Alert</h4>
-          <p className="text-xs text-amber-600">Ada {lowStockProducts.length} produk di bawah batas minimum stok (5 unit).</p>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {lowStockProducts.map(p => (
-          <div key={p.id} className="flex items-center justify-between bg-white/60 p-3 rounded-xl border border-amber-200/50">
-            <div className="flex items-center gap-3">
-              <img src={p.image} className="w-8 h-8 rounded-lg object-cover" />
-              <div>
-                <p className="text-sm font-bold text-slate-900">{p.name}</p>
-                <p className="text-[10px] text-slate-500">Stok saat ini: <span className="text-amber-600 font-bold">{p.stock} unit</span></p>
-              </div>
-            </div>
-            <button 
-              onClick={onRestock}
-              className="px-3 py-1.5 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-amber-200 transition-colors flex items-center gap-1"
-            >
-              Restock <ArrowRight size={10} />
-            </button>
+    <div className="bg-amber-50 border-2 border-amber-200 rounded-3xl p-6 shadow-lg shadow-amber-200/20 relative overflow-hidden group">
+      <div className="relative z-10">
+        <div className="flex items-center gap-4 mb-5">
+          <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 animate-pulse">
+            <AlertTriangle size={24} />
           </div>
-        ))}
+          <div>
+            <h4 className="font-black text-amber-900 text-lg uppercase tracking-tight">Peringatan Stok Rendah</h4>
+            <p className="text-sm text-amber-700 font-medium">Beberapa produk butuh pengisian ulang segera.</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {lowStockProducts.map(p => (
+            <div key={p.id} className="flex items-center justify-between bg-white border border-amber-100 p-4 rounded-2xl hover:border-amber-300 transition-all shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img src={p.image} className="w-12 h-12 rounded-xl object-cover" />
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                    {p.stock}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900 truncate max-w-[120px]">{p.name}</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-black">{p.category}</p>
+                </div>
+              </div>
+              <button 
+                onClick={onRestock}
+                className="px-4 py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95"
+              >
+                Restock
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
+      
+      {/* Decorative patterns */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/20 rounded-full -mr-10 -mt-10 blur-2xl" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-amber-300/10 rounded-full -ml-8 -mb-8 blur-xl" />
     </div>
   );
 };

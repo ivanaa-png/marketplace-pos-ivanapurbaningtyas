@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { productsDB } from '../../services/db';
-import { Product } from '../../types';
-import { Plus, Search, Edit2, Trash2, X, Upload, Package, Shield } from 'lucide-react';
+import { productsDB, configDB } from '../../services/db';
+import { Product, StoreConfig } from '../../types';
+import { Plus, Search, Edit2, Trash2, X, Upload, Package, Shield, Calculator, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CATEGORIES } from '../../constants';
-import { formatRupiah, parseRupiah } from '../../lib/utils';
+import { formatRupiah } from '../../lib/utils';
 
 export default function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,12 +12,14 @@ export default function ProductManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [storeConfig, setStoreConfig] = useState<StoreConfig | null>(null);
 
   // Form State
-  const [formData, setFormData] = useState<Partial<Product> & { priceInput: string }>({
+  const [formData, setFormData] = useState<Partial<Product> & { purchasePriceInput: string }>({
     name: '',
     price: 0,
-    priceInput: '',
+    purchasePrice: 0,
+    purchasePriceInput: '',
     stock: 0,
     category: 'Men',
     image: '',
@@ -27,17 +29,31 @@ export default function ProductManagement() {
   });
 
   useEffect(() => {
-    loadProducts();
+    loadData();
   }, []);
 
-  const loadProducts = async () => {
+  const loadData = async () => {
     try {
-      const dbProducts = await productsDB.getAll();
+      const [dbProducts, config] = await Promise.all([
+        productsDB.getAll(),
+        configDB.get('store_config')
+      ]);
       setProducts(dbProducts);
+      setStoreConfig(config);
     } catch (error) {
       console.error('Failed to load products:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const calculateSellingPrice = (purchasePrice: number): number => {
+    if (!storeConfig) return purchasePrice;
+    
+    if (storeConfig.marginType === 'percentage') {
+      return Math.round(purchasePrice * (1 + storeConfig.marginValue / 100));
+    } else {
+      return purchasePrice + storeConfig.marginValue;
     }
   };
 
@@ -46,7 +62,7 @@ export default function ProductManagement() {
       setEditingProduct(product);
       setFormData({
         ...product,
-        priceInput: formatRupiah(product.price).replace('Rp', '').trim(),
+        purchasePriceInput: formatRupiah(product.purchasePrice || product.price).replace('Rp', '').trim(),
         sizes: product.sizes || ['S', 'M', 'L', 'XL']
       });
     } else {
@@ -54,7 +70,8 @@ export default function ProductManagement() {
       setFormData({
         name: '',
         price: 0,
-        priceInput: '',
+        purchasePrice: 0,
+        purchasePriceInput: '',
         stock: 0,
         category: 'Men',
         image: '',
@@ -82,20 +99,23 @@ export default function ProductManagement() {
     }
   };
 
-  const handlePriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePurchasePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '');
     const numericVal = parseInt(val, 10) || 0;
+    const sellingPrice = calculateSellingPrice(numericVal);
+    
     setFormData(prev => ({
       ...prev,
-      price: numericVal,
-      priceInput: formatRupiah(numericVal).replace('Rp', '').trim()
+      purchasePrice: numericVal,
+      price: sellingPrice,
+      purchasePriceInput: numericVal.toLocaleString('id-ID')
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { priceInput, ...rest } = formData;
+      const { purchasePriceInput, ...rest } = formData;
       const productData = {
         ...rest,
         id: editingProduct ? editingProduct.id : `P-${Date.now()}`,
@@ -107,7 +127,7 @@ export default function ProductManagement() {
         await productsDB.add(productData);
       }
       
-      await loadProducts();
+      await loadData();
       handleCloseModal();
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -118,7 +138,7 @@ export default function ProductManagement() {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await productsDB.delete(id);
-        await loadProducts();
+        await loadData();
       } catch (error) {
         console.error('Failed to delete product:', error);
       }
@@ -168,12 +188,13 @@ export default function ProductManagement() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
-                <th className="px-6 py-4 font-semibold">Product</th>
-                <th className="px-6 py-4 font-semibold">Category</th>
-                <th className="px-6 py-4 font-semibold">Price</th>
-                <th className="px-6 py-4 font-semibold">Stock</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
+              <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase font-bold tracking-widest">
+                <th className="px-6 py-4">Product</th>
+                <th className="px-6 py-4">Category</th>
+                <th className="px-6 py-4">Purchase Price</th>
+                <th className="px-6 py-4">Selling Price</th>
+                <th className="px-6 py-4">Stock</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -216,6 +237,7 @@ export default function ProductManagement() {
                         {product.category}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-500">{formatRupiah(product.purchasePrice || product.price)}</td>
                     <td className="px-6 py-4 text-sm font-bold text-slate-900">{formatRupiah(product.price)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -286,50 +308,67 @@ export default function ProductManagement() {
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Price (Rp)</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={formData.priceInput}
-                          onChange={handlePriceInputChange}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                        />
+                    <div className="space-y-4">
+                      <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-3">
+                        <div className="flex items-center gap-2 text-indigo-700">
+                          <Calculator size={16} />
+                          <span className="text-xs font-bold uppercase tracking-wider">Pricing Engine</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Purchase Price (Harga Beli)</label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">Rp</span>
+                              <input 
+                                type="text" 
+                                required
+                                value={formData.purchasePriceInput}
+                                onChange={handlePurchasePriceChange}
+                                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold text-slate-900"
+                                placeholder="0"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-white rounded-xl border border-indigo-100 flex items-center justify-between">
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Auto Selling Price</p>
+                              <p className="text-lg font-bold text-primary">{formatRupiah(formData.price || 0)}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Margin Applied</p>
+                              <p className="text-xs font-bold text-indigo-600">
+                                {storeConfig?.marginType === 'percentage' ? `+${storeConfig.marginValue}%` : `+${formatRupiah(storeConfig?.marginValue || 0)}`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Stock</label>
-                        <input 
-                          type="number" 
-                          required
-                          value={formData.stock}
-                          onChange={(e) => setFormData(prev => ({ ...prev, stock: parseInt(e.target.value) }))}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Category</label>
-                        <select 
-                          value={formData.category}
-                          onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                        >
-                          {CATEGORIES.filter(c => c !== 'All').map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Material</label>
-                        <input 
-                          type="text" 
-                          value={formData.material}
-                          onChange={(e) => setFormData(prev => ({ ...prev, material: e.target.value }))}
-                          placeholder="e.g. Italian Silk"
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                        />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Stock Level</label>
+                          <input 
+                            type="number" 
+                            required
+                            value={formData.stock}
+                            onChange={(e) => setFormData(prev => ({ ...prev, stock: parseInt(e.target.value) || 0 }))}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Category</label>
+                          <select 
+                            value={formData.category}
+                            onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          >
+                            {CATEGORIES.filter(c => c !== 'All').map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -26,7 +26,9 @@ const DEFAULT_STORE: StoreConfig = {
   address: 'Jl. Premium Luxury No. 88, Jakarta, Indonesia',
   phone: '+62 812-5511-1347',
   email: 'concierge@lumenarce.com',
-  newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.'
+  newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.',
+  marginType: 'percentage',
+  marginValue: 30
 };
 
 export default function ContentManagement() {

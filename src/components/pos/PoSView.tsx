@@ -17,6 +17,7 @@ export default function PoSView() {
   const [isLoading, setIsLoading] = useState(true);
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
+  const [storeConfig, setStoreConfig] = useState<any>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadReceipt = async () => {
@@ -42,14 +43,21 @@ export default function PoSView() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        let dbProducts = await productsDB.getAll();
+        const { configDB } = await import('../../services/db');
+        const [dbProducts, config] = await Promise.all([
+          productsDB.getAll(),
+          configDB.get('store_config')
+        ]);
+        
+        let initialProducts = dbProducts;
         if (dbProducts.length === 0) {
           await productsDB.bulkAdd(PRODUCTS);
-          dbProducts = await productsDB.getAll();
+          initialProducts = await productsDB.getAll();
         }
-        setProducts(dbProducts);
+        setProducts(initialProducts);
+        setStoreConfig(config);
       } catch (error) {
-        console.error('Failed to load products:', error);
+        console.error('Failed to load data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -241,10 +249,11 @@ export default function PoSView() {
 
               <div className="p-8 bg-white font-mono text-xs text-slate-800 space-y-4 overflow-y-auto max-h-[70vh] no-scrollbar" ref={receiptRef}>
                 <div className="text-center space-y-1">
-                  <h2 className="text-lg font-bold uppercase tracking-widest">LUMEN & ARCE</h2>
-                  <p>Jl. Premium Luxury No. 88</p>
+                  <h2 className="text-lg font-bold uppercase tracking-widest">{storeConfig?.storeName || 'LUMEN & ARCE'}</h2>
+                  <p>{storeConfig?.address || 'Jl. Premium Luxury No. 88'}</p>
                   <p>Jakarta, Indonesia</p>
-                  <p>Telp: +62 812-5511-1347</p>
+                  <p>Telp: {storeConfig?.phone || '+62 812-5511-1347'}</p>
+                  {storeConfig?.email && <p>{storeConfig.email}</p>}
                 </div>
 
                 <div className="border-t border-dashed border-slate-300 pt-4 space-y-1">

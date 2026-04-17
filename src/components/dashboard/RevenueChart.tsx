@@ -18,6 +18,11 @@ interface RevenueChartProps {
 
 export default function RevenueChart({ transactions }: RevenueChartProps) {
   const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [isMounted, setIsMounted] = useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const chartData = useMemo(() => {
     const now = new Date();
@@ -129,48 +134,50 @@ export default function RevenueChart({ transactions }: RevenueChartProps) {
           </div>
         )}
         
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1}/>
-                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-            <XAxis 
-              dataKey="name" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
-              dy={10}
-            />
-            <YAxis 
-              hide={true}
-              domain={[0, 'auto']}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                borderRadius: '12px', 
-                border: 'none', 
-                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                fontSize: '12px',
-                fontWeight: '600'
-              }}
-              formatter={(value: number) => [formatRupiah(value), 'Revenue']}
-              cursor={{ stroke: '#4F46E5', strokeWidth: 1, strokeDasharray: '5 5' }}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="revenue" 
-              stroke="#4F46E5" 
-              strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorRevenue)" 
-              animationDuration={1500}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {isMounted && (
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
+                dy={10}
+              />
+              <YAxis 
+                hide={true}
+                domain={[0, 'auto']}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  borderRadius: '12px', 
+                  border: 'none', 
+                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}
+                formatter={(value: number) => [formatRupiah(value), 'Revenue']}
+                cursor={{ stroke: '#4F46E5', strokeWidth: 1, strokeDasharray: '5 5' }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="revenue" 
+                stroke="#4F46E5" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorRevenue)" 
+                animationDuration={1500}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

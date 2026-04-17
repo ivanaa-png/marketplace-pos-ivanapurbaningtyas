@@ -93,7 +93,16 @@ export default function App() {
             address: 'Jl. Premium Luxury No. 88, Jakarta, Indonesia',
             phone: '+62 812-5511-1347',
             email: 'concierge@lumenarce.com',
-            newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.'
+            newsletterText: 'Join our inner circle for exclusive previews and sartorial insights.',
+            marginType: 'percentage',
+            marginValue: 20
+          });
+        } else if (!existingConfig.marginType) {
+          // Update legacy config to include profit margin settings
+          await configDB.set('store_config', {
+            ...existingConfig,
+            marginType: 'percentage',
+            marginValue: 20
           });
         } else if (
           existingConfig.phone === '+62 858-7826-3582' || 

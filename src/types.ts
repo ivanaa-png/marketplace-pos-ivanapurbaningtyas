@@ -1,7 +1,8 @@
 export interface Product {
   id: string;
   name: string;
-  price: number;
+  price: number; // This will be the Selling Price (Harga Jual)
+  purchasePrice: number; // Harga Beli
   stock: number;
   category: string;
   image: string; // Base64 or URL
@@ -25,6 +26,8 @@ export interface StoreConfig {
   phone: string;
   email: string;
   newsletterText: string;
+  marginType: 'percentage' | 'nominal';
+  marginValue: number;
 }
 
 export interface CartItem extends Product {
