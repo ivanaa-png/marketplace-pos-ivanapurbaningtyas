@@ -4,7 +4,7 @@ import { HeroSlide, StoreConfig } from '../../types';
 import { Save, Plus, Trash2, Image as ImageIcon, Layout, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 
-const DEFAULT_SLIDES: HeroSlide[] = [
+export const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: '1',
     image: 'https://images.unsplash.com/photo-1558997519-83bc9c02c639?q=80&w=2000&auto=format&fit=crop',

@@ -7,7 +7,7 @@ export const PRODUCTS: Product[] = [
     price: 12500000,
     stock: 5,
     category: 'Women',
-    image: '/images/gown.jpg',
+    image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1000&auto=format&fit=crop',
     description: 'Exquisite midnight blue silk gown with hand-stitched detailing.',
   },
   {
@@ -25,7 +25,7 @@ export const PRODUCTS: Product[] = [
     price: 21000000,
     stock: 12,
     category: 'Couple',
-    image: '/images/lounge.jpg',
+    image: 'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?q=80&w=1000&auto=format&fit=crop',
     description: 'Ultra-soft cashmere sets designed for elegant coordination.',
   },
   {
@@ -34,7 +34,7 @@ export const PRODUCTS: Product[] = [
     price: 154000000,
     stock: 2,
     category: 'Accessories',
-    image: '/images/watch.jpg',
+    image: 'https://images.unsplash.com/photo-1547996160-81dfa63595aa?q=80&w=1000&auto=format&fit=crop',
     description: 'Luxury timepiece featuring VVS diamonds and 18k gold.',
   },
   {
@@ -43,7 +43,7 @@ export const PRODUCTS: Product[] = [
     price: 6500000,
     stock: 15,
     category: 'Men',
-    image: '/images/shoes.jpg',
+    image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?q=80&w=1000&auto=format&fit=crop',
     description: 'Full-grain leather oxfords with Goodyear welt construction.',
   },
   {
@@ -52,7 +52,7 @@ export const PRODUCTS: Product[] = [
     price: 4500000,
     stock: 20,
     category: 'Accessories',
-    image: '/images/clutch.jpg',
+    image: 'https://images.unsplash.com/photo-1566150905458-1bf1fd143c5b?q=80&w=1000&auto=format&fit=crop',
     description: 'Deep emerald velvet clutch with a detachable 24k gold plated chain.',
   },
 ];

@@ -55,6 +55,34 @@ export default function App() {
         const existing = await productsDB.getAll();
         if (existing.length === 0) {
           await productsDB.bulkAdd(PRODUCTS);
+        } else {
+          // Force update images for existing products if they use the old /images/ path
+          const outdatedProducts = existing.filter(p => p.image.startsWith('/images/'));
+          if (outdatedProducts.length > 0) {
+            for (const product of outdatedProducts) {
+              const currentProduct = PRODUCTS.find(p => p.id === product.id);
+              if (currentProduct) {
+                await productsDB.update({ ...product, image: currentProduct.image });
+              }
+            }
+          }
+        }
+
+        // Seed/Update hero slides
+        const existingSlides = await configDB.get('hero_slides');
+        if (!existingSlides) {
+          const { DEFAULT_SLIDES } = await import('./components/content/ContentManagement');
+          await configDB.set('hero_slides', DEFAULT_SLIDES);
+        } else {
+          // Ensure slide 1 has the wardrobe image if it's still using the old one
+          const slide1 = existingSlides.find((s: any) => s.id === '1');
+          const wardrobeImg = 'https://images.unsplash.com/photo-1558997519-83bc9c02c639?q=80&w=2000&auto=format&fit=crop';
+          if (slide1 && slide1.image !== wardrobeImg) {
+            const updatedSlides = existingSlides.map((s: any) => 
+              s.id === '1' ? { ...s, image: wardrobeImg } : s
+            );
+            await configDB.set('hero_slides', updatedSlides);
+          }
         }
 
         // Seed default store config if not exists
